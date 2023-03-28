@@ -29,6 +29,9 @@ import urllib3
 import signal
 import os 
 import sys
+from itertools import product
+import socks
+import socket
 
 def read_wordlist(wordlist_path):
     with open(wordlist_path, 'r') as f:
@@ -135,17 +138,103 @@ def signals(sig, frame, found_links, output_file):
 found_links = []
 signal.signal(signal.SIGINT, lambda sig, frame: signals(sig, frame, found_links, args.output))
 
+def append_extensions(words, extensions):
+    extended_words = set(words)
+    for word in words:
+        for ext in extensions:
+            extended_words.add(word + ext)
+    return list(extended_words)
 
+def get_random_proxy(proxies):
+    return random.choice(proxies) if proxies else None
+
+def apply_rate_limiting_evasion(delay, proxies):
+    if delay:
+        time.sleep(delay)
+    if proxies:
+        return {'http': get_random_proxy(proxies), 'https': get_random_proxy(proxies)}
+    return None
+
+def parse_robots_txt(url):
+    try:
+        response = requests.get(url + '/robots.txt')
+        if response.status_code == 200:
+            return response.text.splitlines()
+    except requests.exceptions.RequestException:
+        pass
+    return []
+
+def is_allowed(url, rules):
+    for rule in rules:
+        if rule.startswith('Disallow:'):
+            disallowed_path = rule.split(' ')[1]
+            if url.startswith(disallowed_path):
+                return False
+    return True
+
+def fuzz(wordlist, fuzzing_chars="0123456789-_"):
+    fuzzed_words = set(wordlist)
+    for word in wordlist:
+        for char in fuzzing_chars:
+            fuzzed_words.add(word + char)
+    return list(fuzzed_words)
+
+def find_directories_recursive(base_url, found_links, wordlist=None, output_file=None, depth=0, max_depth=3):
+
+    if depth > max_depth:
+        return
+
+    print(f"\nScanning depth {depth}: {base_url}")
+    new_links = find_directories(base_url, found_links, wordlist, output_file)
+    
+    for link in new_links:
+        if link.endswith('/'):
+            find_directories_recursive(link, found_links, wordlist, output_file, depth=depth + 1, max_depth=max_depth)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Arescan Advanced Directory Discovery Tool')
     parser.add_argument('url', help='The base URL to search')
     parser.add_argument('-w', '--wordlist', help='Path to the wordlist file', default=None)
     parser.add_argument('-o', '--output', help='Path to the output file', default=None)
+    parser.add_argument('-r', '--recursive', help='Enable recursive search (default: 3 levels deep)', action='store_true')
+    parser.add_argument('-f', '--fuzzing', help='Enable fuzzing to discover hidden files, directories, or parameters', action='store_true')
+    parser.add_argument('-d', '--depth', help='Maximum recursion depth (default: 3)', default=3, type=int)
+    parser.add_argument('-e', '--extensions', help='Comma-separated list of file extensions to search (e.g., .php,.html)', default='')
+    parser.add_argument('-p', '--proxies', help='Path to the proxy list file (one proxy per line)', default=None)
+    parser.add_argument('-l', '--delay', help='Delay between requests in seconds (default: 0)', default=0, type=float)
+    parser.add_argument('-t', '--tor', help='Enable Tor support', action='store_true')
+
     args = parser.parse_args()
 
     wordlist = None
     if args.wordlist:
         wordlist = read_wordlist(args.wordlist)
+        if args.fuzzing:
+            wordlist = fuzz(wordlist)
 
-    find_directories(args.url, found_links, wordlist, args.output)
+    extensions = args.extensions.split(',') if args.extensions else []
+    if extensions:
+        wordlist = append_extensions(wordlist, extensions)
+
+    proxies = []
+    if args.proxies:
+        with open(args.proxies, 'r') as f:
+            proxies = f.read().splitlines()
+
+    delay = args.delay
+
+    robot_rules = parse_robots_txt(args.url)
+
+    if args.tor:
+        try:
+            socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+            socket.socket = socks.socksocket
+            print("Tor support enabled.")
+        except Exception as e:
+            print(f"Error enabling Tor support: {e}")
+            sys.exit(1)
+
+    if args.recursive:
+        find_directories_recursive(args.url, found_links, wordlist, args.output, max_depth=args.depth)
+    else:
+        find_directories(args.url, found_links, wordlist, args.output)
