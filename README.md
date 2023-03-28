@@ -13,8 +13,22 @@ Arescan is a powerful web directory discovery tool that helps you uncover hidden
 - Supports pausing the search and saving progress.
 - Output to a file for easy post-processing
 - Python 3 optimization
+- Recursive directory scanning
+- Fuzzing to discover hidden files, directories, or parameters
+- Ability to specify maximum recursion depth
+- Support for file extensions search
+- Support for proxy list and rate limiting
+- Support for Tor network
 
 ## Changelog
+
+### v1.2 
+- Added support for recursive search
+- Added support for file/directory fuzzing
+- Added support for searching specific file extensions
+- Added support for using proxies
+- Added option for delay between requests
+- Added Tor support
 
 ### v1.1
 
@@ -62,19 +76,29 @@ python3 Arescan.py https://example.com
   ```
 ## Advanced Options
 
-python3 Arescan.py <url> [-w <wordlist>] [-o <output>]
+python3 Arescan.py <url> [-w <wordlist>] [-o <output>] [-r] [-f] [-d <depth>] [-e <extensions>] [-p <proxies>] [-l <delay>] [-t]
+
 
 
 ``` bash
 
-python3 Arescan.py https://example.com -w path/to/wordlist.txt -o output.txt
+python3 Arescan.py http://example.com -w wordlist.txt -o output.txt -r -f -d 5 -e .php,.html -p proxies.txt -l 1 -t
 
 
-<url> : The base URL to search.
+
+<url>: The base URL to search.
 -w <wordlist> (optional): Path to the wordlist file.
 -o <output> (optional): Path to the output file.
+-r (optional): Enable recursive search (default: 3 levels deep).
+-f (optional): Enable fuzzing to discover hidden files, directories, or parameters.
+-d <depth> (optional): Maximum recursion depth (default: 3).
+-e <extensions> (optional): Comma-separated list of file extensions to search (e.g., .php,.html).
+-p <proxies> (optional): Path to the proxy list file (one proxy per line).
+-l <delay> (optional): Delay between requests in seconds (default: 0).
+-t (optional): Enable Tor support.
 
 ```
+This will perform a recursive search on http://example.com, using the wordlist.txt wordlist file, and saving the output to output.txt. The search will be up to 5 levels deep, and will include fuzzing to discover hidden files and directories with the extensions .php and .html. The search will be rate-limited by a delay of 1 second between requests, using the proxies listed in proxies.txt. Finally, Tor support will be enabled.
 
 ## Output <br>
 Arescan will print discovered URLs with their corresponding HTTP status codes. Once the scan is complete, it will display a list of all found URLs within the target domain. If an output file is specified, the found URLs will be saved in the file.
