@@ -41,7 +41,8 @@ python3 Arescan.py https://example.com
 ## Output <br>
 Arescan will print discovered URLs with their corresponding HTTP status codes. Once the scan is complete, it will display a list of all found URLs within the target domain.<br>
 
-
+## License <br>
+Arescan is released under the MIT License. See the [LICENSE](https://github.com/blue0x1/Arescan/blob/main/LICENSE) file for details.<br>
 ## Disclaimer
 Arescan is intended for educational and legal purposes only. The author and contributors are not responsible for any misuse or damage caused by using this tool. Always obtain permission from the website owner before scanning their site.
 
