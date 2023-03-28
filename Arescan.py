@@ -13,7 +13,7 @@ print("\033[31m" + """
    / /\ \ | '__/ _ \/ __|/ __/ _` | '_ \ 
   / ____ \| | |  __/\__ \ (_| (_| | | | |
  /_/    \_\_|  \___||___/\___\__,_|_| |_|
-                                           v 1.0 by blue0x1
+                                           v 1.1 by blue0x1
                                          
         
           
@@ -26,6 +26,15 @@ from bs4 import BeautifulSoup
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import urllib3
+import signal
+import os 
+import sys
+
+def read_wordlist(wordlist_path):
+    with open(wordlist_path, 'r') as f:
+        words = f.read().splitlines()
+    return words
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -64,7 +73,9 @@ def process_url(url, base_url, user_agents, found_links, visited_urls):
 
 
 
-def find_directories(base_url):
+
+def find_directories(base_url, found_links, wordlist=None, output_file=None):
+
     """
     Perform a breadth-first search for directories.
     """
@@ -76,9 +87,12 @@ def find_directories(base_url):
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/601.7.7 (KHTML, like Gecko) Version/9.1.2 Safari/601.7.7'
     ]
 
-    urls_to_search = [base_url]
+    if wordlist:
+        urls_to_search = [os.path.join(base_url, word) for word in wordlist]
+    else:
+        urls_to_search = [base_url]
+
     visited_urls = set()
-    found_links = []
 
     max_threads = 20
 
@@ -99,17 +113,39 @@ def find_directories(base_url):
                 visited_urls.add(url)
 
     print("\nFound URLs:")
-    for link in found_links:
-        if link.startswith(base_url):
+    if output_file:
+        with open(output_file, 'a') as f:
+            for link in found_links:
+                print(f"\t{link}")
+                f.write(f"{link}\n")
+    else:
+        for link in found_links:
             print(f"\t{link}")
 
+
+def signals(sig, frame, found_links, output_file):
+    answer = input("\nDo you want to stop the search? (y/n): ").lower().strip()
+    if answer == 'y':
+        print("Saving the current output...")
+        with open(output_file, 'a') as f:
+            for link in found_links:
+                f.write(f"{link}\n")
+        sys.exit(0)
+
+found_links = []
+signal.signal(signal.SIGINT, lambda sig, frame: signals(sig, frame, found_links, args.output))
 
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser(description='Arescan Advanced Directory Discovery Tool')
     parser.add_argument('url', help='The base URL to search')
+    parser.add_argument('-w', '--wordlist', help='Path to the wordlist file', default=None)
+    parser.add_argument('-o', '--output', help='Path to the output file', default=None)
     args = parser.parse_args()
 
-    find_directories(args.url)
+    wordlist = None
+    if args.wordlist:
+        wordlist = read_wordlist(args.wordlist)
+
+    find_directories(args.url, found_links, wordlist, args.output)
