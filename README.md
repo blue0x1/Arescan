@@ -24,8 +24,14 @@ Arescan is a powerful web directory discovery tool that helps you uncover hidden
 - Support for file extensions search
 - Support for proxy list and rate limiting
 - Support for Tor network
+- Support for automatically select proxies
 
 ## Changelog
+### v1.3 
+- Added a new option to enable automatic proxy usage
+
+### Fixes:
+Fixed an issue where proxies were not being used properly.
 
 ### v1.2 
 - Added support for recursive search
@@ -98,6 +104,7 @@ python3 Arescan.py http://example.com -w wordlist.txt -o output.txt -r -f -d 5 -
 -f (optional): Enable fuzzing to discover hidden files, directories, or parameters.
 -d <depth> (optional): Maximum recursion depth (default: 3).
 -e <extensions> (optional): Comma-separated list of file extensions to search (e.g., .php,.html).
+--auto-proxy (optional): Automatically use proxies
 -p <proxies> (optional): Path to the proxy list file (one proxy per line).
 -l <delay> (optional): Delay between requests in seconds (default: 0).
 -t (optional): Enable Tor support.
