@@ -29,6 +29,7 @@ Arescan is a powerful web directory discovery tool that helps you uncover hidden
 ## Changelog
 ### v1.3 
 - Added a new option to enable automatic proxy usage
+- Added autosave
 
 ### Fixes:
 Fixed an issue where proxies were not being used properly.
