@@ -119,6 +119,10 @@ Arescan will print discovered URLs with their corresponding HTTP status codes. O
 
 ## License <br>
 Arescan is released under the MIT License. See the [LICENSE](https://github.com/blue0x1/Arescan/blob/main/LICENSE) file for details.<br>
+
+## Author <br> 
+Chokri Hammedi ( blue0x1 )
+<br>
 ## Disclaimer
 Arescan is intended for educational and legal purposes only. The author is not responsible for any misuse or damage caused by using this tool. Always obtain permission from the website owner before scanning their site.
 
