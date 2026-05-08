@@ -4,7 +4,8 @@ Arescan is a powerful web directory discovery tool that helps you uncover hidden
 
 
 
-![Ares](https://e1.pxfuel.com/desktop-wallpaper/687/39/desktop-wallpaper-god-of-war-ares-backgrounds-god-of-war-monster.jpg)
+ 
+<img width="1408" height="768" alt="arescan" src="https://github.com/user-attachments/assets/d74dde0a-7f8b-475c-94b3-0d991f318997" />
 
 
 ## Features
